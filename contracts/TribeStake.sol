@@ -9,7 +9,11 @@ import "@pancakeswap/pancake-swap-lib/contracts/token/BEP20/SafeBEP20.sol";
 import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 
-contract TribeStaking is Initializable, ReentrancyGuardUpgradeable, OwnableUpgradeable  {
+contract TribeStaking is
+  Initializable,
+  ReentrancyGuardUpgradeable,
+  OwnableUpgradeable
+{
   using SafeMath for uint256;
 
   using SafeBEP20 for IBEP20;
@@ -108,8 +112,6 @@ contract TribeStaking is Initializable, ReentrancyGuardUpgradeable, OwnableUpgra
     uint256 _poolLimitPerUser,
     address _admin
   ) public initializer {
-
-
     stakedToken = _stakedToken;
     rewardToken = _rewardToken;
     annualRewardPerToken = _annualRewardPerToken;
