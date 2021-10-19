@@ -30,7 +30,7 @@ const logger = getLogger("scripts::deploy-tribe");
     address _admin
 */
 
-const _stakedToken = "0x4187bb1550021c22f9c0691c78f727049317e2b6"; //kovan addresses, change to correct later
+const _stakedToken = "0x4187bb1550021c22f9c0691c78f727049317e2b6"; //testnet addresses, change this chunk of parameters depending on what you need
 const _rewardToken = "0x4187bb1550021c22f9c0691c78f727049317e2b6";
 const _annualRewardPerToken = 1;
 const _withdrawFreezeBlocksCount = 1200;
