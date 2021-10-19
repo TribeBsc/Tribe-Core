@@ -112,6 +112,9 @@ contract TribeStaking is
     uint256 _poolLimitPerUser,
     address _admin
   ) public initializer {
+    __ReentrancyGuard_init();
+    __Ownable_init();
+
     stakedToken = _stakedToken;
     rewardToken = _rewardToken;
     annualRewardPerToken = _annualRewardPerToken;
@@ -140,8 +143,6 @@ contract TribeStaking is
 
     // Transfer ownership to the admin address who becomes owner of the contract
     transferOwnership(_admin);
-    __ReentrancyGuard_init();
-    __Ownable_init();
   }
 
   /*
