@@ -1,26 +1,21 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity ^0.6.12;
+pragma solidity ^0.8.4;
 pragma experimental ABIEncoderV2;
 
-import "@pancakeswap/pancake-swap-lib/contracts/math/SafeMath.sol";
+import "@openzeppelin/contracts-upgradeable/security/ReentrancyGuardUpgradeable.sol";
 import "@pancakeswap/pancake-swap-lib/contracts/token/BEP20/IBEP20.sol";
 import "@pancakeswap/pancake-swap-lib/contracts/token/BEP20/SafeBEP20.sol";
-import "@pancakeswap/pancake-swap-lib/contracts/access/Ownable.sol";
-import "@pancakeswap/pancake-swap-lib/contracts/utils/ReentrancyGuard.sol";
+import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 
-contract TribeStaking is Ownable, ReentrancyGuard {
+contract TribeStaking is ReentrancyGuardUpgradeable, OwnableUpgradeable {
   using SafeMath for uint256;
 
   using SafeBEP20 for IBEP20;
-  // The address of the smart chef factory
-  address public SMART_CHEF_FACTORY;
 
   // Whether a limit is set for users
   bool public hasUserLimit;
-
-  // Whether it is initialized
-  bool public isInitialized;
 
   // Accrued token per share
   uint256 accTokenPerShare;
@@ -44,7 +39,7 @@ contract TribeStaking is Ownable, ReentrancyGuard {
   uint256 blockRewardPerToken;
 
   //Max Precision
-  uint256 maxPrecision = uint256(10**30);
+  uint256 constant maxPrecision = uint256(10**30);
 
   // The reward token
   IBEP20 public rewardToken;
@@ -92,10 +87,6 @@ contract TribeStaking is Ownable, ReentrancyGuard {
   event AddRewardTokens(address indexed user, uint256 amount);
   event NewWithdrawFreezeBlocksCount(uint256 blockCount);
 
-  constructor() public {
-    SMART_CHEF_FACTORY = msg.sender;
-  }
-
   /*
    * @notice Initialize the contract
    * @param _stakedToken: staked token address
@@ -116,12 +107,8 @@ contract TribeStaking is Ownable, ReentrancyGuard {
     uint256 _bonusEndBlock,
     uint256 _poolLimitPerUser,
     address _admin
-  ) external {
-    require(!isInitialized, "Already initialized");
-    require(msg.sender == SMART_CHEF_FACTORY, "Not factory");
-
-    // Make this contract initialized
-    isInitialized = true;
+  ) public initializer {
+    __Ownable_init();
 
     stakedToken = _stakedToken;
     rewardToken = _rewardToken;
@@ -188,7 +175,9 @@ contract TribeStaking is Ownable, ReentrancyGuard {
       stakedToken.safeTransferFrom(address(msg.sender), address(this), _amount);
       totalStakingTokens = totalStakingTokens.add(_amount);
       if (withdrawFreezeBlocksCount > 0) {
-        user.withdrawFreezeEndBlock = block.number + withdrawFreezeBlocksCount;
+        user.withdrawFreezeEndBlock = block.number.add(
+          withdrawFreezeBlocksCount
+        );
       }
     }
 
@@ -283,8 +272,8 @@ contract TribeStaking is Ownable, ReentrancyGuard {
       _limit = 1;
     }
 
-    if (_limit > totalUsers - _offset) {
-      _limit = totalUsers - _offset;
+    if (_limit > totalUsers.sub(_offset)) {
+      _limit = totalUsers.sub(_offset);
     }
 
     UserInfo[] memory values = new UserInfo[](_limit);
@@ -480,7 +469,7 @@ contract TribeStaking is Ownable, ReentrancyGuard {
   function freezeForDays(uint256 _days) external onlyOwner {
     require(_days > 0, "Days to freeze must be greater than 0");
     freezeStartBlock = block.number;
-    freezeEndBlock = block.number.add(_days * 24 * 60 * 20);
+    freezeEndBlock = block.number.add(_days.mul(24).mul(60).mul(20));
     emit NewFreezeBlocks(freezeStartBlock, freezeEndBlock);
   }
 
