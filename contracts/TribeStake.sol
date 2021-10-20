@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity ^0.8.4;
+pragma solidity 0.8.4;
 pragma experimental ABIEncoderV2;
 
 import "@openzeppelin/contracts-upgradeable/security/ReentrancyGuardUpgradeable.sol";
@@ -22,7 +22,7 @@ contract TribeStaking is
   bool public hasUserLimit;
 
   // Accrued token per share
-  uint256 accTokenPerShare;
+  uint256 public accTokenPerShare;
 
   // The block number when CAKE mining ends.
   uint256 public bonusEndBlock;
@@ -40,7 +40,7 @@ contract TribeStaking is
   uint256 public annualRewardPerToken;
 
   // CAKE tokens created per staked token every block.
-  uint256 blockRewardPerToken;
+  uint256 public blockRewardPerToken;
 
   //Max Precision
   uint256 constant maxPrecision = uint256(10**30);
