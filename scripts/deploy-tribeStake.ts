@@ -32,7 +32,7 @@ const logger = getLogger("scripts::deploy-tribe");
 
 const _stakedToken = "0x4187bb1550021c22f9c0691c78f727049317e2b6"; //testnet addresses, change this chunk of parameters depending on what you need
 const _rewardToken = "0x4187bb1550021c22f9c0691c78f727049317e2b6";
-const _annualRewardPerToken = 1;
+const _annualRewardPerToken = 10000000000;
 const _withdrawFreezeBlocksCount = 1200;
 const _startBlock = 0;
 const _bonusEndBlock = 23195171;
@@ -48,7 +48,6 @@ interface DeployedContract {
 
 interface UpgradableDeployedContract extends DeployedContract {
   implementationAddress: string;
-  admin: string;
 }
 
 async function main() {
@@ -68,33 +67,24 @@ async function main() {
 
   logger.debug(`Implementation version is ${bytecodeHash}`);
 
-  const instance = await upgrades.deployProxy(
-    tribefactory,
-    [
-      _stakedToken,
-      _rewardToken,
-      _annualRewardPerToken,
-      _withdrawFreezeBlocksCount,
-      _startBlock,
-      _bonusEndBlock,
-      _poolLimitPerUser,
-      _admin,
-    ],
-    {
-      initializer: "initialize",
-    }
-  );
+  const instance = await tribefactory.deploy(  );
   await instance.deployed();
+  await instance.initialize(
+    _stakedToken,
+    _rewardToken,
+    _annualRewardPerToken,
+    _withdrawFreezeBlocksCount,
+    _startBlock,
+    _bonusEndBlock,
+    _poolLimitPerUser,
+    _admin,
+  )
 
   logger.debug(`Deployed contract to ${instance.address}`);
 
   const ozUpgradesManifestClient = await Manifest.forNetwork(network.provider);
   const manifest = await ozUpgradesManifestClient.read();
   const implementationContract = manifest.impls[bytecodeHash];
-
-  if (!manifest.admin) {
-    throw Error(`No admin address?`);
-  }
 
   if (!implementationContract) {
     throw Error(`No implementation contract?`);
@@ -106,7 +96,6 @@ async function main() {
     implementationAddress: implementationContract.address,
     version: bytecodeHash,
     date: new Date().toISOString(),
-    admin: manifest.admin.address,
   };
 
   logger.debug(`Saving deployment data...`);
@@ -174,7 +163,6 @@ const saveDeploymentData = async (
   if (deployment.isUpgradable) {
     const upgradableDeployment = deployment as UpgradableDeployedContract;
     implementation = upgradableDeployment.implementationAddress;
-    admin = upgradableDeployment.admin;
   }
 
   const finalTag = tag || "untagged";
@@ -189,7 +177,6 @@ const saveDeploymentData = async (
     date: deployment.date,
     args,
     isUpgradable: deployment.isUpgradable,
-    admin,
     implementation,
   };
 

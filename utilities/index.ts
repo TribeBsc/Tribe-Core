@@ -11,7 +11,6 @@ export interface DeploymentData {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   args: { [key: string]: any };
   isUpgradable: boolean;
-  admin?: string;
   implementation?: string;
 }
 
