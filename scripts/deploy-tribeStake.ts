@@ -28,15 +28,37 @@ const logger = getLogger("scripts::deploy-tribe");
     uint256 _bonusEndBlock,
     uint256 _poolLimitPerUser,
     address _admin
+
+    // 0x11882c707748A003BC4d60a8Db9e37ff34640CEb TESTNET DEPLOY
+
+const _stakedToken = "0xc34c85a3d7a84212b6234146773f7939a931a8af"; //TOKEN DEL CONTRATO
+const _rewardToken = "0xc34c85a3d7a84212b6234146773f7939a931a8af";
+const _annualRewardPerToken = "500000000000000000"; //n * 10**18 for each token per year, this case 1 = 100%
+const _withdrawFreezeBlocksCount = "0"; //
+const _startBlock = "0";
+const _bonusEndBlock = "23195171"; //BLOQUE DONDE TERMINA EL STAKE
+const _poolLimitPerUser = "0";
+const _admin = "0x822D71E46806081FA348aAB60A7b824B91e57825";
+
+    // 0xD433B4f4bDc3d359C98DE9025DE8f5cf90F8e940 TESTNET DEPLOY
+
+const _stakedToken = "0xc34c85a3d7a84212b6234146773f7939a931a8af"; 
+const _rewardToken = "0xc34c85a3d7a84212b6234146773f7939a931a8af";
+const _annualRewardPerToken = "1000000000000000000";  // 50% more token per token
+const _withdrawFreezeBlocksCount = "2592000";  // 90 * 24 * 60 * 20 blocks, 90 days of freeze after deposit, 28800 blocks per day
+const _startBlock = "0";
+const _bonusEndBlock = "23195171";
+const _poolLimitPerUser = "0";
+const _admin = "0x822D71E46806081FA348aAB60A7b824B91e57825";
 */
 
-const _stakedToken = "0x4187bb1550021c22f9c0691c78f727049317e2b6"; //testnet addresses, change this chunk of parameters depending on what you need
-const _rewardToken = "0x4187bb1550021c22f9c0691c78f727049317e2b6";
-const _annualRewardPerToken = 10000000000;
-const _withdrawFreezeBlocksCount = 1200;
-const _startBlock = 0;
-const _bonusEndBlock = 23195171;
-const _poolLimitPerUser = 0;
+const _stakedToken = "0xc34c85a3d7a84212b6234146773f7939a931a8af"; 
+const _rewardToken = "0xc34c85a3d7a84212b6234146773f7939a931a8af";
+const _annualRewardPerToken = "1000000000000000000";  // 50% more token per token
+const _withdrawFreezeBlocksCount = "2592000";  // 90 * 24 * 60 * 20 blocks, 90 days of freeze after deposit, 28800 blocks per day
+const _startBlock = "0";
+const _bonusEndBlock = "23195171";
+const _poolLimitPerUser = "0";
 const _admin = "0x822D71E46806081FA348aAB60A7b824B91e57825";
 
 interface DeployedContract {
@@ -67,33 +89,14 @@ async function main() {
 
   logger.debug(`Implementation version is ${bytecodeHash}`);
 
-  const instance = await tribefactory.deploy(  );
-  await instance.deployed();
-  await instance.initialize(
-    _stakedToken,
-    _rewardToken,
-    _annualRewardPerToken,
-    _withdrawFreezeBlocksCount,
-    _startBlock,
-    _bonusEndBlock,
-    _poolLimitPerUser,
-    _admin,
-  )
+  const instance = await tribefactory.deploy();
 
   logger.debug(`Deployed contract to ${instance.address}`);
-
-  const ozUpgradesManifestClient = await Manifest.forNetwork(network.provider);
-  const manifest = await ozUpgradesManifestClient.read();
-  const implementationContract = manifest.impls[bytecodeHash];
-
-  if (!implementationContract) {
-    throw Error(`No implementation contract?`);
-  }
 
   const deploymentData: UpgradableDeployedContract = {
     isUpgradable: true,
     instance,
-    implementationAddress: implementationContract.address,
+    implementationAddress: instance.address,
     version: bytecodeHash,
     date: new Date().toISOString(),
   };
